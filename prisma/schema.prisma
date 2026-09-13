@@ -13,15 +13,17 @@ model Test {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id               String            @id
+  name             String
+  email            String
+  emailVerified    Boolean           @default(false)
+  image            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  workspaces       Workspace[]       @relation("UserWorkspaces")
+  workspaceMembers WorkspaceMember[]
 
   @@unique([email])
   @@map("user")
@@ -73,4 +75,45 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// Workspace & Membership
+
+model Workspace {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User    @relation("UserWorkspaces", fields: [ownerId], references: [id])
+
+  // collections  Collection[]
+  members WorkspaceMember[]
+  // environments Environment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([name, ownerId])
+}
+
+enum MEMBER_ROLE {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model WorkspaceMember {
+  id   String      @id @default(cuid())
+  role MEMBER_ROLE @default(ADMIN)
+
+  userId      String
+  workspaceId String
+
+  user      User      @relation(fields: [userId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, workspaceId])
 }

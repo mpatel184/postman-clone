@@ -1,7 +1,10 @@
 import React from "react";
 import Header from "@/modules/layout/components/header";
 import { currentUser } from "@/modules/authentication/actions";
+import { initializeWorkspace } from "@/modules/workspace/actions";
+
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+    const workspace = await initializeWorkspace()
     const user = await currentUser()
     return (
         <>
