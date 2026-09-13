@@ -5,7 +5,7 @@ export default async function Home() {
   const user = await currentUser()
   return (
     <div className="flex justify-center items-center h-screen">
-      <UserButton user={user} />
+      {/* <UserButton user={user} /> */}
     </div>
   )
 }
