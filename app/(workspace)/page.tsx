@@ -1,11 +1,36 @@
-import Image from "next/image";
-import { currentUser } from "@/modules/authentication/actions";
-import UserButton from "@/modules/authentication/components/user-button";
-export default async function Home() {
-  const user = await currentUser()
+"use client";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import { useWorkspaceStore } from "@/modules/layout/store";
+
+import TabbedSidebar from "@/modules/collections/components/sidebar";
+
+import { useCreateWorkspace, useGetWorkspace } from "@/modules/workspace/hooks/workspace";
+
+
+const page = () => {
+
+  const { selectedWorkspace } = useWorkspaceStore();
+  const { data: currentWorkspace, isLoading, error } = useGetWorkspace(selectedWorkspace?.id!);
+
+
+
+
   return (
-    <div className="flex justify-center items-center h-screen">
-      {/* <UserButton user={user} /> */}
-    </div>
+    <ResizablePanelGroup orientation="horizontal">
+      <ResizablePanel maxSize={65}>One</ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={35} maxSize={35} minSize={25} className="flex">
+        <div className="flex-1">
+          <TabbedSidebar currentWorkspace={currentWorkspace} />
+        </div>
+
+      </ResizablePanel>
+    </ResizablePanelGroup>
   )
 }
+
+export default page

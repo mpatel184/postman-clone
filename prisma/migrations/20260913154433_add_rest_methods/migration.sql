@@ -1,0 +1,2 @@
+-- CreateEnum
+CREATE TYPE "REST_METHOD" AS ENUM ('GET', 'POST', 'PUT', 'PATCH', 'DELETE');

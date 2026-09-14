@@ -7,7 +7,7 @@ export function useWorkspaces() {
         queryFn: async () => getWorkspaces(),
     })
 }
-export function useWorkspaceById(id: string) {
+export function useGetWorkspace(id: string) {
     return useQuery({
         queryKey: ["workspace", id],
         queryFn: async () => getWorkspaceById(id),
