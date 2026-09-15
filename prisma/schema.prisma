@@ -77,8 +77,6 @@ model Verification {
   @@map("verification")
 }
 
-// Workspace & Membership
-
 model Workspace {
   id          String  @id @default(cuid())
   name        String
@@ -86,9 +84,9 @@ model Workspace {
   ownerId     String
   owner       User    @relation("UserWorkspaces", fields: [ownerId], references: [id])
 
-  collections Collection[]
-  members     WorkspaceMember[]
-  // environments Environment[]
+  collections  Collection[]
+  members      WorkspaceMember[]
+  environments Environment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -126,8 +124,9 @@ model Collection {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   // requests    Request[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  requests  Request[]
 }
 
 enum REST_METHOD {
@@ -136,4 +135,45 @@ enum REST_METHOD {
   PUT
   PATCH
   DELETE
+}
+
+model Request {
+  id       String      @id @default(cuid())
+  name     String
+  method   REST_METHOD @default(GET)
+  url      String
+  headers  Json?
+  body     Json?
+  response Json?
+
+  collectionId String
+  collection   Collection   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  runs         RequestRun[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model RequestRun {
+  id String @id @default(cuid())
+
+  requestId String
+  request   Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  status     Int
+  statusText String?
+  headers    Json?
+  body       String?
+  durationMs Int?
+
+  createdAt DateTime @default(now())
+}
+
+model Environment {
+  id     String @id @default(cuid())
+  name   String
+  values Json
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
