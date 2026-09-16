@@ -87,10 +87,8 @@ const CollectionFolder = ({ collection }: Props) => {
                             />
 
                             <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <button className='p-1 hover:bg-zinc-800 rounded'>
-                                        <EllipsisVertical className='w-4 h-4 text-zinc-400 hover:text-indigo-400' />
-                                    </button>
+                                <DropdownMenuTrigger className='p-1 hover:bg-zinc-800 rounded'>
+                                    <EllipsisVertical className='w-4 h-4 text-zinc-400 hover:text-indigo-400' />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-48">
                                     <DropdownMenuItem onClick={() => setIsAddRequestOpen(true)}>

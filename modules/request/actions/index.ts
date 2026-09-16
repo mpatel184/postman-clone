@@ -10,6 +10,7 @@ export interface Request {
     url: string;
     body?: string;
     headers?: string;
+    parameters?: string;
     response?: string;
 }
 
