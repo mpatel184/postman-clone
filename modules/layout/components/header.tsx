@@ -10,7 +10,7 @@ import { User } from 'better-auth'
 import { UserProps } from '../types'
 
 interface Props {
-    user: UserProps;
+    user: UserProps | null;
 }
 const Header = ({ user }: Props) => {
 
@@ -27,8 +27,8 @@ const Header = ({ user }: Props) => {
             </div>
 
             <div className='col-span-2 flex items-center justify-end space-x-2 hover:cursor-pointer hover:opacity-80'>
-                <InviteMember currentUser={user} />
-                <WorkSpace />
+                {user && <InviteMember currentUser={user} />}
+                {user && <WorkSpace />}
                 <UserButton user={user} />
             </div>
         </header>

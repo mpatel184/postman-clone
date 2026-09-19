@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { User, LogOut, Settings, CreditCard, User as UserIcon } from "lucide-react";
+import Link from "next/link";
+import { User, LogOut, Settings, CreditCard, User as UserIcon, LogIn } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -111,9 +112,19 @@ export default function UserButton({
         lg: "h-12 w-12",
     };
 
-    // Don't render if no user
+    // If no user, show Sign In button
     if (!user) {
-        return null;
+        return (
+            <Link href="/sign-in">
+                <Button
+                    size="sm"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium flex items-center gap-1.5 h-8 px-3.5 rounded-lg shadow-sm transition-all cursor-pointer"
+                >
+                    <LogIn className="size-4" />
+                    <span>Sign In</span>
+                </Button>
+            </Link>
+        );
     }
 
     return (
