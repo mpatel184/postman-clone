@@ -20,6 +20,8 @@ model User {
   accounts    Account[]
   workspaces  Workspace[]       @relation("UserWorkspaces")
   memberships WorkspaceMember[]
+
+  workspaceInvites WorkspaceInvite[]
 }
 
 model Session {
@@ -72,6 +74,7 @@ model Workspace {
 
   collections  Collection[]
   members      WorkspaceMember[]
+  invites      WorkspaceInvite[]
   environments Environment[]
 
   websocketPresets WebSocketPreset[]
@@ -79,6 +82,19 @@ model Workspace {
   updatedAt        DateTime          @default(now()) @updatedAt
 
   @@unique([name, ownerId])
+}
+
+model WorkspaceInvite {
+  id          String    @id @default(cuid())
+  workspaceId String
+  token       String    @unique
+  expiresAt   DateTime?
+  createdById String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
 }
 
 model WebSocketPreset {
@@ -163,8 +179,9 @@ model Request {
   url        String
   parameters Json?
   headers    Json?
-  body       Json?
-  response   Json?
+
+  body     Json?
+  response Json?
 
   collectionId String
   collection   Collection   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
@@ -190,9 +207,10 @@ model RequestRun {
 }
 
 model Environment {
-  id          String    @id @default(cuid())
-  name        String
-  values      Json
+  id     String @id @default(cuid())
+  name   String
+  values Json
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
