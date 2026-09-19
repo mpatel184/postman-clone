@@ -107,7 +107,7 @@ export default function PlaygroundPage() {
             <SaveRequestToCollectionModal
                 isModalOpen={showSaveModal}
                 setIsModalOpen={setShowSaveModal}
-                collectionId={activeTab?.collectionId ?? ""}
+                collectionId={activeTab?.collectionId}
                 initialName={activeTab?.title ?? "Untitled Request"}
             />
         </div>

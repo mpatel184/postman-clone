@@ -167,10 +167,8 @@ const CollectionFolder = ({ collection }: Props) => {
 
                                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                                             <DropdownMenu>
-                                                <DropdownMenuTrigger>
-                                                    <button className='p-1 hover:bg-zinc-800 rounded'>
-                                                        <EllipsisVertical className='w-3 h-3 text-zinc-400' />
-                                                    </button>
+                                                <DropdownMenuTrigger className='p-1 hover:bg-zinc-800 rounded'>
+                                                    <EllipsisVertical className='w-3 h-3 text-zinc-400' />
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className="w-32">
                                                     <DropdownMenuItem>

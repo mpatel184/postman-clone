@@ -2,8 +2,8 @@ import React from "react";
 import { RequestTab } from "../store/useRequestStore";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-// import KeyValueFormEditor from "./key-value-form";
-// import BodyEditor from "./body-editor";
+import KeyValueFormEditor from "./key-value-form";
+import BodyEditor from "./body-editor";
 import { toast } from "sonner";
 
 interface Props {
@@ -82,7 +82,7 @@ const RequestEditorArea = ({ tab, updateTab }: Props) => {
                 </TabsTrigger>
             </TabsList>
 
-            {/* <TabsContent value="parameters" >
+            <TabsContent value="parameters" >
                 <KeyValueFormEditor
                     initialData={getParametersData()}
                     onSubmit={handleParametersChange}
@@ -111,7 +111,7 @@ const RequestEditorArea = ({ tab, updateTab }: Props) => {
                     initialData={getBodyData()}
                     onSubmit={handleBodyChange}
                 />
-            </TabsContent> */}
+            </TabsContent>
         </Tabs>
     );
 };
