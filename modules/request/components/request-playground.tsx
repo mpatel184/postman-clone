@@ -109,6 +109,12 @@ export default function PlaygroundPage() {
                 setIsModalOpen={setShowSaveModal}
                 collectionId={activeTab?.collectionId}
                 initialName={activeTab?.title ?? "Untitled Request"}
+                activeTabId={activeTab?.id}
+                requestData={{
+                    name: activeTab?.title ?? "Untitled Request",
+                    url: activeTab?.url ?? "",
+                    method: (activeTab?.method as any) ?? "GET",
+                }}
             />
         </div>
     );

@@ -10,6 +10,7 @@ import { REST_METHOD } from "@prisma/client";
 import { useWorkspaceStore } from "@/modules/layout/store";
 import { useCollections } from "../hooks/collections";
 import { Button } from "@/components/ui/button";
+import { useRequestPlaygroundStore } from "@/modules/request/store/useRequestStore";
 
 
 const SaveRequestToCollectionModal = ({
@@ -17,11 +18,12 @@ const SaveRequestToCollectionModal = ({
     setIsModalOpen,
     requestData = {
         name: "Untitled",
-        url: "https://echo.hoppscotch.io",
+        url: "",
         method: REST_METHOD.GET,
     },
     initialName = "Untitled",
-    collectionId
+    collectionId,
+    activeTabId,
 }: {
     isModalOpen: boolean;
     setIsModalOpen: (open: boolean) => void;
@@ -31,8 +33,10 @@ const SaveRequestToCollectionModal = ({
         url: string;
     };
     initialName?: string;
-    collectionId?: string
+    collectionId?: string;
+    activeTabId?: string;
 }) => {
+    const { updateTab, markUnsaved } = useRequestPlaygroundStore();
     const [requestName, setRequestName] = useState(initialName);
     const [selectedCollectionId, setSelectedCollectionId] = useState<string>(collectionId || "");
     const [searchTerm, setSearchTerm] = useState("");
@@ -91,11 +95,21 @@ const SaveRequestToCollectionModal = ({
         }
 
         try {
-            await mutateAsync({
+            const saved = await mutateAsync({
                 url: requestData.url.trim(),
                 method: requestData.method,
                 name: requestName.trim(),
             });
+
+            // Update the active tab so it reflects the saved name and becomes linked to the request
+            if (activeTabId && saved) {
+                updateTab(activeTabId, {
+                    title: requestName.trim(),
+                    requestId: (saved as any).id,
+                    collectionId: selectedCollectionId,
+                });
+                markUnsaved(activeTabId, false);
+            }
 
             toast.success(`Request saved to "${selectedCollection?.name}" collection`);
             setIsModalOpen(false);
@@ -217,14 +231,6 @@ const SaveRequestToCollectionModal = ({
                         </div>
                     </div>
                 )}
-
-                {/* URL Preview (Optional) */}
-                <div className="p-2 bg-zinc-900 rounded border border-zinc-700">
-                    <div className="flex items-center space-x-2 text-xs">
-                        <span className="text-zinc-500">URL:</span>
-                        <span className="text-zinc-300 truncate">{requestData.url}</span>
-                    </div>
-                </div>
             </div>
         </Modal>
     );

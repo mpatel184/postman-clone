@@ -6,6 +6,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
     Select,
     SelectContent,
@@ -19,8 +22,13 @@ import {
     FormField,
     FormItem
 } from '@/components/ui/form'
-import { RotateCcw, Copy, Check, Code, AlignLeft, FileText } from 'lucide-react'
+import { RotateCcw, Copy, Check, Code, AlignLeft, FileText, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useGenerateJsonBody } from '@/modules/ai/hooks/ai-suggestion'
+
+import { useWorkspaceStore } from '@/modules/layout/store'
+import { useRequestPlaygroundStore } from '../store/useRequestStore'
+
 
 const MonacoEditor = dynamic(
     () => import('@monaco-editor/react'),
@@ -49,6 +57,13 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
     className
 }) => {
     const [copied, setCopied] = useState(false)
+    const [showGenerateDialog, setShowGenerateDialog] = useState(false)
+    const [prompt, setPrompt] = useState('')
+    const { selectedWorkspace } = useWorkspaceStore()
+
+    const { tabs, activeTabId } = useRequestPlaygroundStore();
+
+    const { mutateAsync, data, isPending, isError } = useGenerateJsonBody()
 
     const form = useForm<BodyEditorFormData>({
         resolver: zodResolver(bodyEditorSchema),
@@ -60,6 +75,14 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
 
     const contentType = form.watch('contentType')
     const bodyValue = form.watch('body')
+
+    // Reset form whenever the tab changes (initialData comes from the active tab)
+    useEffect(() => {
+        form.reset({
+            contentType: initialData.contentType || 'application/json',
+            body: initialData.body || '',
+        })
+    }, [initialData.body, initialData.contentType])
 
     // Handle editor value changes
     const handleEditorChange = (value?: string) => {
@@ -79,7 +102,42 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
         }
     }
 
-    // Format JSON
+    const handleGenerateClick = () => {
+        setShowGenerateDialog(true);
+    }
+
+    const onGenerateBody = async (promptText: string) => {
+        try {
+
+
+            if (bodyValue) {
+                try {
+                    JSON.parse(bodyValue);
+                } catch (e) {
+
+                    console.log('Invalid existing JSON, generating new schema');
+                }
+            }
+
+            const result = await mutateAsync({
+                prompt: promptText,
+                method: tabs.find(t => t.id === activeTabId)?.method || 'POST',
+                endpoint: tabs.find(t => t.id === activeTabId)?.url || '/',
+                context: `Generate a JSON body with the following requirements: ${promptText}`,
+
+            });
+
+            if (result?.jsonBody) {
+                form.setValue('body', JSON.stringify(result.jsonBody, null, 2));
+            }
+            setShowGenerateDialog(false);
+            setPrompt('');
+        } catch (error) {
+            console.error('Failed to generate JSON body:', error);
+        }
+    }
+
+
     const handleFormat = () => {
         if (contentType === 'application/json' && bodyValue) {
             try {
@@ -128,7 +186,7 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
                                         <FormItem>
                                             <Select
                                                 onValueChange={field.onChange}
-                                                value={field.value}
+                                                defaultValue={field.value}
                                             >
                                                 <FormControl>
                                                     <SelectTrigger className="w-[180px] h-7 bg-zinc-700 border-zinc-600 text-xs">
@@ -157,17 +215,30 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
                         </div>
                         <div className="flex items-center gap-2">
                             {contentType === 'application/json' && (
+
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    onClick={handleFormat}
+                                    onClick={handleGenerateClick}
+                                    disabled={isPending}
                                     className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700"
-                                    title="Format JSON"
+                                    title="Generate JSON Body"
                                 >
-                                    <AlignLeft className="h-3 w-3" />
+                                    <Sparkles className={cn('h-3 w-3', isPending ? 'animate-spin text-zinc-400' : 'text-green-400')} />
                                 </Button>
                             )}
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleFormat}
+                                className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700"
+                                title="Format JSON"
+                            >
+                                <AlignLeft className="h-3 w-3" />
+                            </Button>
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -243,6 +314,45 @@ const BodyEditor: React.FC<BodyEditorProps> = ({
                     </div>
                 </div>
             </Form>
+
+            {/* Generate JSON Dialog */}
+            <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+                <DialogContent className="sm:max-w-[425px] bg-zinc-900 text-zinc-100 border-zinc-800">
+                    <DialogHeader>
+                        <DialogTitle>Generate JSON Body</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="prompt">What kind of JSON body do you need?</Label>
+                            <Input
+                                id="prompt"
+                                value={prompt}
+                                onChange={(e) => setPrompt(e.target.value)}
+                                className="bg-zinc-800 border-zinc-700"
+                                placeholder="e.g., Create a user registration body with email and password"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowGenerateDialog(false)}
+                            className="border-zinc-700 text-zinc-300"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            onClick={() => onGenerateBody(prompt)}
+                            disabled={!prompt.trim() || isPending}
+                            className="bg-indigo-500 hover:bg-indigo-600"
+                        >
+                            {isPending ? 'Generating...' : 'Generate'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

@@ -14,6 +14,8 @@ import {
 
 import EditCollectionModal from './edit-collection';
 import DeleteCollectionModal from './delete-collection';
+import DeleteRequestModal from './delete-request-modal';
+import EditRequestModal from './edit-request-modal';
 import AddRequestCollectionModal from './add-request-modal';
 import { useGetAllRequestFromCollection } from '@/modules/request/hooks/request';
 import { REST_METHOD } from '@prisma/client';
@@ -33,6 +35,9 @@ const CollectionFolder = ({ collection }: Props) => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isDeleteRequestOpen, setIsDeleteRequestOpen] = useState(false);
+    const [isEditRequestOpen, setIsEditRequestOpen] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState<{ id: string; name: string; method: REST_METHOD; url: string } | null>(null);
 
     const { data: requestData, isPending, isError } = useGetAllRequestFromCollection(collection.id);
 
@@ -171,11 +176,23 @@ const CollectionFolder = ({ collection }: Props) => {
                                                     <EllipsisVertical className='w-3 h-3 text-zinc-400' />
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className="w-32">
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedRequest({ id: request.id, name: request.name || request.url, method: request.method, url: request.url });
+                                                            setIsEditRequestOpen(true);
+                                                        }}
+                                                    >
                                                         <Edit className='text-blue-400 mr-2 w-3 h-3' />
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedRequest({ id: request.id, name: request.name || request.url, method: request.method, url: request.url });
+                                                            setIsDeleteRequestOpen(true);
+                                                        }}
+                                                    >
                                                         <Trash className='text-red-400 mr-2 w-3 h-3' />
                                                         Delete
                                                     </DropdownMenuItem>
@@ -214,6 +231,24 @@ const CollectionFolder = ({ collection }: Props) => {
                 collectionId={collection.id}
                 initialName="Untitled Request"
             />
+
+            {selectedRequest && (
+                <DeleteRequestModal
+                    isModalOpen={isDeleteRequestOpen}
+                    setIsModalOpen={setIsDeleteRequestOpen}
+                    collectionId={collection.id}
+                    request={selectedRequest}
+                />
+            )}
+
+            {selectedRequest && (
+                <EditRequestModal
+                    isModalOpen={isEditRequestOpen}
+                    setIsModalOpen={setIsEditRequestOpen}
+                    collectionId={collection.id}
+                    request={selectedRequest}
+                />
+            )}
         </>
     );
 };
