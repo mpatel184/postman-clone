@@ -12,14 +12,19 @@ const Invite = async ({ params }: { params: Promise<{ token: string }> }) => {
         redirect('/sign-in');
     }
 
-    const invite = await acceptWorkspaceInvite(token);
+    let success = false;
+    try {
+        const invite = await acceptWorkspaceInvite(token);
+        success = invite.success;
+    } catch (error) {
+        console.error("Failed to accept workspace invite:", error);
+    }
 
-    if (invite.success) {
+    if (success) {
         redirect('/');
     }
 
-    return redirect('/sign-in');
-
+    redirect('/');
 }
 
 export default Invite

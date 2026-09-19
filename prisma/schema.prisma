@@ -85,9 +85,10 @@ model Workspace {
 }
 
 model WorkspaceInvite {
-  id          String    @id @default(cuid())
+  id          String       @id @default(cuid())
   workspaceId String
-  token       String    @unique
+  token       String       @unique
+  role        MEMBER_ROLE  @default(VIEWER)
   expiresAt   DateTime?
   createdById String
 

@@ -7,11 +7,13 @@ import {
     getAllWorkspaceMembers
 } from "@/modules/invites/actions";
 
+import { MEMBER_ROLE } from "@prisma/client";
+
 export const useGenerateWorkspaceInvite = (workspaceId: string) => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: () => generateWorkspaceInvite(workspaceId),
+        mutationFn: (role?: MEMBER_ROLE) => generateWorkspaceInvite(workspaceId, role),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["workspace-invites", workspaceId],
@@ -24,14 +26,12 @@ export const useAcceptWorkspaceInvite = () => {
     return useMutation({
         mutationFn: (token: string) => acceptWorkspaceInvite(token),
     });
-
 };
 
 export const useGetWorkspaceMemebers = (workspaceId: string) => {
-
     return useQuery({
-        queryKey: ["workspace-members"],
+        queryKey: ["workspace-members", workspaceId],
         queryFn: async () => getAllWorkspaceMembers(workspaceId),
-
+        enabled: !!workspaceId,
     });
-}
+};
