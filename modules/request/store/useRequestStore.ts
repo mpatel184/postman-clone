@@ -22,7 +22,7 @@ export type RequestTab = {
     headers?: string;
     parameters?: string;
     unsavedChanges?: boolean;
-    requestId?: string; // 👈 link to DB request
+    requestId?: string;
     collectionId?: string;
     workspaceId?: string;
 };
@@ -35,7 +35,7 @@ type PlaygroundState = {
     setActiveTab: (id: string) => void;
     updateTab: (id: string, data: Partial<RequestTab>) => void;
     markUnsaved: (id: string, value: boolean) => void;
-    openRequestTab: (req: any) => void; // 👈 new
+    openRequestTab: (req: any) => void;
     updateTabFromSavedRequest: (tabId: string, savedRequest: SavedRequest) => void;
     responseViewerData: ResponseData | null;
     setResponseViewerData: (data: ResponseData) => void
@@ -103,7 +103,6 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
 
     openRequestTab: (req) =>
         set((state) => {
-            // 🔎 check if already open
             const existing = state.tabs.find((t) => t.requestId === req.id);
             if (existing) {
                 return { activeTabId: existing.id };
@@ -135,7 +134,7 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
                 t.id === tabId
                     ? {
                         ...t,
-                        id: savedRequest.id, // ✅ Replace temporary id with saved one
+                        id: savedRequest.id,
                         title: savedRequest.name,
                         method: savedRequest.method,
                         body: savedRequest?.body,
@@ -146,7 +145,7 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
                     }
                     : t
             ),
-            activeTabId: savedRequest.id, // ✅ keep active in sync
+            activeTabId: savedRequest.id,
         })),
 
 }));

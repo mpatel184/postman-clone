@@ -19,17 +19,17 @@ import {
     TestTube
 } from 'lucide-react';
 
-type HeadersMap = Record<string, string>;
+type HeadersMap = Record<string, unknown>;
 
 interface RequestRun {
     id: string;
     requestId?: string;
-    status?: number;
-    statusText?: string;
-    headers?: HeadersMap;
+    status?: number | null;
+    statusText?: string | null;
+    headers?: HeadersMap | null;
     body?: string | object | null;
-    durationMs?: number;
-    createdAt?: string;
+    durationMs?: number | null;
+    createdAt?: string | Date | null;
 }
 
 interface Result {
@@ -93,10 +93,10 @@ const ResponseViewer = ({ responseData }: Props) => {
             : JSON.stringify(responseBody, null, 2);
     }
 
-    const status: number | undefined = responseData.result?.status ?? responseData.requestRun?.status;
-    const statusText: string | undefined = responseData.result?.statusText ?? responseData.requestRun?.statusText;
-    const duration: number | undefined = responseData.result?.duration ?? responseData.requestRun?.durationMs;
-    const size: number | undefined = responseData.result?.size;
+    const status: number | undefined = (responseData.result?.status ?? responseData.requestRun?.status) ?? undefined;
+    const statusText: string | undefined = (responseData.result?.statusText ?? responseData.requestRun?.statusText) ?? undefined;
+    const duration: number | undefined = (responseData.result?.duration ?? responseData.requestRun?.durationMs) ?? undefined;
+    const size: number | undefined = responseData.result?.size ?? undefined;
     const rawBody = responseData.requestRun?.body;
 
     return (
@@ -279,13 +279,13 @@ const ResponseViewer = ({ responseData }: Props) => {
                                                 <div key={key} className="flex items-start justify-between py-2 border-b border-zinc-800 last:border-b-0">
                                                     <div className="flex-1 min-w-0">
                                                         <div className="font-medium text-blue-300 text-sm">{key}</div>
-                                                        <div className="text-gray-300 text-sm break-all">{value}</div>
+                                                        <div className="text-gray-300 text-sm break-all">{String(value)}</div>
                                                     </div>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
                                                         className="text-gray-400 hover:text-white ml-2"
-                                                        onClick={() => copyToClipboard(`${key}: ${value}`)}
+                                                        onClick={() => copyToClipboard(`${key}: ${String(value)}`)}
                                                     >
                                                         <Copy className="w-3 h-3" />
                                                     </Button>
